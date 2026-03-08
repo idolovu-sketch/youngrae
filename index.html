@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조영래 — PLAYER ONE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@300;400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --neon-cyan: #00fff7;
+  --neon-pink: #ff2d95;
+  --neon-purple: #b537f2;
+  --neon-yellow: #ffe156;
+  --neon-green: #39ff14;
+  --neon-orange: #ff6a00;
+  --dark-bg: #0a0a12;
+  --dark-card: #12121e;
+  --dark-card-alt: #1a1a2e;
+  --grid-color: rgba(0, 255, 247, 0.04);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark-bg);
+  color: #e0e0e0;
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* ===== SCANLINE & GRID OVERLAY ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 247, 0.015) 2px,
+      rgba(0, 255, 247, 0.015) 4px
+    );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(180deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark-bg); }
+::-webkit-scrollbar-thumb {
+  background: var(--neon-cyan);
+  border-radius: 3px;
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* ===== NOISE TEXTURE ===== */
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ===== FLOATING PARTICLES ===== */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 6px var(--neon-cyan);
+  animation: float-up linear infinite;
+  opacity: 0;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.hero-bg-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(150px);
+  opacity: 0.15;
+  animation: pulse-glow 4s ease-in-out infinite alternate;
+}
+
+.hero-bg-glow.cyan { background: var(--neon-cyan); top: 10%; left: 20%; }
+.hero-bg-glow.pink { background: var(--neon-pink); bottom: 10%; right: 10%; animation-delay: 2s; }
+.hero-bg-glow.purple { background: var(--neon-purple); top: 50%; left: 60%; animation-delay: 1s; }
+
+@keyframes pulse-glow {
+  0% { transform: scale(1); opacity: 0.12; }
+  100% { transform: scale(1.3); opacity: 0.2; }
+}
+
+.hero-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: var(--neon-cyan);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 20px var(--neon-cyan);
+  animation: flicker 3s infinite;
+  position: relative;
+  z-index: 3;
+}
+
+@keyframes flicker {
+  0%, 93%, 95%, 97%, 100% { opacity: 1; }
+  94%, 96% { opacity: 0.4; }
+}
+
+.hero-name {
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: clamp(4rem, 12vw, 10rem);
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 20px var(--neon-cyan),
+    0 0 60px rgba(0, 255, 247, 0.3),
+    0 0 120px rgba(0, 255, 247, 0.1);
+  position: relative;
+  z-index: 3;
+  animation: title-appear 1s ease-out;
+}
+
+@keyframes title-appear {
+  0% { transform: translateY(40px) scale(0.9); opacity: 0; filter: blur(10px); }
+  100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+}
+
+.hero-name .accent {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--neon-pink);
+  margin-top: 1.5rem;
+  letter-spacing: 3px;
+  text-shadow: 0 0 15px var(--neon-pink);
+  position: relative;
+  z-index: 3;
+  animation: title-appear 1s ease-out 0.3s both;
+}
+
+.hero-level {
+  margin-top: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 3;
+  animation: title-appear 1s ease-out 0.5s both;
+}
+
+.level-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.xp-bar {
+  width: 200px;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.xp-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--neon-cyan);
+  animation: xp-load 2s ease-out 1s forwards;
+}
+
+@keyframes xp-load {
+  to { width: 73%; }
+}
+
+.xp-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: var(--neon-cyan);
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  animation: bounce-down 2s ease-in-out infinite;
+}
+
+.scroll-indicator span {
+  display: block;
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--neon-cyan), transparent);
+  margin: 0 auto 0.5rem;
+  border-radius: 1px;
+}
+
+.scroll-indicator small {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  color: var(--neon-cyan);
+  opacity: 0.6;
+  letter-spacing: 2px;
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.8; }
+  50% { transform: translateX(-50%) translateY(10px); opacity: 0.4; }
+}
+
+/* ===== SECTION COMMON ===== */
+section {
+  position: relative;
+  z-index: 3;
+  padding: 6rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--neon-pink);
+  letter-spacing: 5px;
+  text-shadow: 0 0 10px var(--neon-pink);
+  margin-bottom: 0.8rem;
+}
+
+.section-title {
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #fff;
+  margin-bottom: 3rem;
+  text-shadow: 0 0 20px rgba(0, 255, 247, 0.2);
+}
+
+/* ===== PROFILE SECTION ===== */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.profile-avatar {
+  position: relative;
+}
+
+.avatar-frame {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--dark-card);
+  border: 2px solid var(--neon-cyan);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 30px rgba(0, 255, 247, 0.1),
+    inset 0 0 60px rgba(0, 255, 247, 0.03);
+}
+
+.avatar-frame::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(from 0deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink), var(--neon-cyan));
+  border-radius: 16px;
+  z-index: -1;
+  animation: border-spin 4s linear infinite;
+}
+
+@keyframes border-spin {
+  to { transform: rotate(360deg); }
+}
+
+.avatar-emoji {
+  font-size: 8rem;
+  filter: drop-shadow(0 0 20px rgba(0, 255, 247, 0.3));
+  animation: avatar-float 3s ease-in-out infinite;
+}
+
+.avatar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  filter: saturate(1.1) contrast(1.05);
+  animation: avatar-float 3s ease-in-out infinite;
+}
+
+@keyframes avatar-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.avatar-status {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--neon-green);
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 0 15px var(--neon-green);
+  animation: flicker 5s infinite;
+}
+
+.profile-info { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.info-card {
+  background: var(--dark-card);
+  border: 1px solid rgba(0, 255, 247, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.info-card:hover {
+  border-color: var(--neon-cyan);
+  transform: translateX(5px);
+}
+
+.info-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--neon-cyan), var(--neon-purple));
+}
+
+.info-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: var(--neon-cyan);
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.info-value .small { font-size: 0.85rem; color: #999; font-weight: 400; }
+
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid;
+  letter-spacing: 1px;
+}
+
+.tag.cyan { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+.tag.pink { border-color: var(--neon-pink); color: var(--neon-pink); }
+.tag.purple { border-color: var(--neon-purple); color: var(--neon-purple); }
+.tag.yellow { border-color: var(--neon-yellow); color: var(--neon-yellow); }
+.tag.green { border-color: var(--neon-green); color: var(--neon-green); }
+
+/* ===== STATS SECTION ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: var(--dark-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 255, 247, 0.2);
+}
+
+.stat-card .stat-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card .stat-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: #888;
+  letter-spacing: 2px;
+  margin-bottom: 0.8rem;
+}
+
+.stat-card .stat-value {
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: 2.8rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value.cyan { color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0,255,247,0.3); }
+.stat-value.pink { color: var(--neon-pink); text-shadow: 0 0 20px rgba(255,45,149,0.3); }
+.stat-value.yellow { color: var(--neon-yellow); text-shadow: 0 0 20px rgba(255,225,86,0.3); }
+.stat-value.green { color: var(--neon-green); text-shadow: 0 0 20px rgba(57,255,20,0.3); }
+.stat-value.purple { color: var(--neon-purple); text-shadow: 0 0 20px rgba(181,55,242,0.3); }
+.stat-value.orange { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255,106,0,0.3); }
+
+.stat-card .stat-desc {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* ===== BAR CHART ===== */
+.chart-container {
+  background: var(--dark-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 2.5rem;
+}
+
+.chart-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--neon-cyan);
+  letter-spacing: 3px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.chart-bars { display: flex; flex-direction: column; gap: 1.2rem; }
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 60px;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bar-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ccc;
+  text-align: right;
+}
+
+.bar-track {
+  height: 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  position: relative;
+  width: 0%;
+  transition: width 2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bar-fill.game {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+  box-shadow: 0 0 20px rgba(0, 255, 247, 0.3);
+}
+
+.bar-fill.study {
+  background: linear-gradient(90deg, var(--neon-pink), var(--neon-orange));
+  box-shadow: 0 0 20px rgba(255, 45, 149, 0.2);
+}
+
+.bar-fill.sleep {
+  background: linear-gradient(90deg, var(--neon-purple), #6366f1);
+  box-shadow: 0 0 20px rgba(181, 55, 242, 0.2);
+}
+
+.bar-fill.eat {
+  background: linear-gradient(90deg, var(--neon-yellow), var(--neon-orange));
+  box-shadow: 0 0 20px rgba(255, 225, 86, 0.2);
+}
+
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.bar-percent {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: var(--neon-cyan);
+}
+
+/* ===== GAMES SECTION ===== */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.game-card {
+  background: var(--dark-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 20px 60px rgba(0, 255, 247, 0.1);
+}
+
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 255, 247, 0.06), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.game-card:hover::after { opacity: 1; }
+
+.game-emoji {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  transition: transform 0.4s;
+}
+
+.game-card:hover .game-emoji { transform: scale(1.2) rotate(-5deg); }
+
+.game-name {
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: 1.3rem;
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+
+.game-genre {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.game-hours {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--neon-cyan);
+  letter-spacing: 1px;
+}
+
+.game-rank {
+  display: inline-block;
+  margin-top: 0.8rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+
+.rank-master { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
+.rank-diamond { background: rgba(0, 255, 247, 0.1); color: var(--neon-cyan); border: 1px solid rgba(0, 255, 247, 0.3); }
+.rank-plat { background: rgba(181, 55, 242, 0.1); color: var(--neon-purple); border: 1px solid rgba(181, 55, 242, 0.3); }
+.rank-gold { background: rgba(255, 165, 0, 0.1); color: orange; border: 1px solid rgba(255, 165, 0, 0.3); }
+
+/* ===== MESSAGE SECTION ===== */
+.message-box {
+  background: var(--dark-card);
+  border: 2px solid var(--neon-pink);
+  border-radius: 20px;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(255, 45, 149, 0.08);
+}
+
+.message-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 45, 149, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.msg-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.msg-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 0 20px rgba(255, 45, 149, 0.3);
+}
+
+.msg-sender {
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: 1.2rem;
+  color: var(--neon-pink);
+}
+
+.msg-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  color: #666;
+}
+
+.msg-content {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: #ccc;
+  position: relative;
+  z-index: 1;
+}
+
+.msg-content p { margin-bottom: 1rem; }
+
+.msg-content .highlight {
+  color: var(--neon-pink);
+  font-weight: 700;
+}
+
+.msg-content .small-text {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+.msg-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 45, 149, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.msg-reactions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.reaction {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.reaction:hover {
+  background: rgba(255, 45, 149, 0.15);
+  border-color: var(--neon-pink);
+  transform: scale(1.1);
+}
+
+.reaction .count {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  margin-left: 4px;
+  color: #888;
+}
+
+.msg-status {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  color: var(--neon-green);
+}
+
+/* ===== DREAM SECTION ===== */
+.dream-container {
+  position: relative;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.dream-main {
+  background: linear-gradient(135deg, var(--dark-card), var(--dark-card-alt));
+  border: 1px solid rgba(0, 255, 247, 0.15);
+  border-radius: 24px;
+  padding: 4rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dream-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 255, 247, 0.05), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(181, 55, 242, 0.05), transparent 50%);
+  pointer-events: none;
+}
+
+.dream-emoji {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 2rem;
+  animation: avatar-float 3s ease-in-out infinite;
+}
+
+.dream-title {
+  font-family: 'Do Hyeon', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+}
+
+.dream-desc {
+  font-size: 1.1rem;
+  color: #999;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  line-height: 1.8;
+}
+
+.dream-roadmap {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.roadmap-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+
+.roadmap-step.done {
+  background: rgba(57, 255, 20, 0.1);
+  color: var(--neon-green);
+  border: 1px solid rgba(57, 255, 20, 0.2);
+}
+
+.roadmap-step.current {
+  background: rgba(0, 255, 247, 0.1);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0, 255, 247, 0.3);
+  animation: flicker 3s infinite;
+}
+
+.roadmap-step.future {
+  background: rgba(255, 255, 255, 0.03);
+  color: #555;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.roadmap-arrow {
+  color: #333;
+  font-size: 0.6rem;
+  align-self: center;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 4rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.footer-art {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  letter-spacing: 2px;
+}
+
+.footer-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  color: #444;
+  letter-spacing: 3px;
+}
+
+.footer-text .heart { color: var(--neon-pink); }
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .profile-avatar { max-width: 250px; margin: 0 auto; }
+
+  .bar-row {
+    grid-template-columns: 80px 1fr 50px;
+    gap: 0.5rem;
+  }
+
+  .bar-label { font-size: 0.75rem; }
+
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  .message-box { padding: 2rem 1.5rem; }
+
+  section { padding: 4rem 1.5rem; }
+
+  .games-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+  .game-card { padding: 1.5rem 1rem; }
+
+  .dream-main { padding: 3rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .games-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+
+<div class="particles" id="particles"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-bg-glow cyan"></div>
+  <div class="hero-bg-glow pink"></div>
+  <div class="hero-bg-glow purple"></div>
+
+  <div class="hero-tag">/// PLAYER ONE CONNECTED ///</div>
+  <h1 class="hero-name">조<span class="accent">영래</span></h1>
+  <p class="hero-sub">백현중학교 3학년 · 프로게이머 지망생 (자칭)</p>
+
+  <div class="hero-level">
+    <span class="level-badge">LV. 16</span>
+    <div class="xp-bar"><div class="xp-fill"></div></div>
+    <span class="xp-text">7,300 / 10,000 XP</span>
+  </div>
+
+  <div class="scroll-indicator">
+    <span></span>
+    <small>SCROLL DOWN</small>
+  </div>
+</header>
+
+<!-- ===== PROFILE ===== -->
+<section id="profile">
+  <div class="reveal">
+    <div class="section-label">01 // PROFILE</div>
+    <h2 class="section-title">프로필</h2>
+  </div>
+
+  <div class="profile-grid reveal">
+    <div class="profile-avatar">
+      <div class="avatar-frame">
+        <img src="youngrae.jpg" alt="조영래" class="avatar-photo">
+      </div>
+      <div class="avatar-status">● ONLINE - 게임 중</div>
+    </div>
+
+    <div class="profile-info">
+      <div class="info-card">
+        <div class="info-label">REAL NAME</div>
+        <div class="info-value">조영래 <span class="small">(별명: 영래봇)</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">AGE & SCHOOL</div>
+        <div class="info-value">16세 · 백현중학교 3학년</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">MAIN CLASS</div>
+        <div class="info-value">풀타임 게이머 <span class="small">(파트타임 학생)</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">SPECIAL ABILITY</div>
+        <div class="info-value">엄마 잔소리 면역 MAX 🛡️</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">WEAKNESS</div>
+        <div class="info-value">수학 교과서 📕 <span class="small">(치명적 데미지)</span></div>
+      </div>
+
+      <div class="profile-tags">
+        <span class="tag cyan"># 게이머</span>
+        <span class="tag pink"># 공부안함</span>
+        <span class="tag purple"># 야행성</span>
+        <span class="tag yellow"># 라면러버</span>
+        <span class="tag green"># 반항기</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section id="stats">
+  <div class="reveal">
+    <div class="section-label">02 // DAILY STATS</div>
+    <h2 class="section-title">하루 스탯</h2>
+  </div>
+
+  <div class="stats-grid reveal">
+    <div class="stat-card">
+      <div class="stat-icon">🎮</div>
+      <div class="stat-title">GAME TIME</div>
+      <div class="stat-value cyan">12h</div>
+      <div class="stat-desc">하루 평균 게임 시간</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-title">STUDY TIME</div>
+      <div class="stat-value pink">0.5h</div>
+      <div class="stat-desc">시험 전날에만 가끔...</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">😴</div>
+      <div class="stat-title">SLEEP</div>
+      <div class="stat-value purple">5h</div>
+      <div class="stat-desc">새벽 3시 취침이 국룰</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🍜</div>
+      <div class="stat-title">RAMEN</div>
+      <div class="stat-value yellow">3개</div>
+      <div class="stat-desc">하루 라면 섭취량</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📱</div>
+      <div class="stat-title">SCREEN TIME</div>
+      <div class="stat-value green">16h</div>
+      <div class="stat-desc">핸드폰 + 컴퓨터 합산</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👩</div>
+      <div class="stat-title">엄마 잔소리</div>
+      <div class="stat-value orange">∞</div>
+      <div class="stat-desc">측정 불가</div>
+    </div>
+  </div>
+
+  <div class="chart-container reveal">
+    <div class="chart-title">⚔️ 24시간 시간 배분 ⚔️</div>
+    <div class="chart-bars">
+      <div class="bar-row">
+        <span class="bar-label">🎮 게임</span>
+        <div class="bar-track">
+          <div class="bar-fill game" data-width="50"></div>
+        </div>
+        <span class="bar-percent">50%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">😴 수면</span>
+        <div class="bar-track">
+          <div class="bar-fill sleep" data-width="21"></div>
+        </div>
+        <span class="bar-percent">21%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">🍜 식사</span>
+        <div class="bar-track">
+          <div class="bar-fill eat" data-width="12"></div>
+        </div>
+        <span class="bar-percent">12%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">📱 유튜브</span>
+        <div class="bar-track">
+          <div class="bar-fill game" data-width="15"></div>
+        </div>
+        <span class="bar-percent">15%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">📚 공부</span>
+        <div class="bar-track">
+          <div class="bar-fill study" data-width="2"></div>
+        </div>
+        <span class="bar-percent">2%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GAMES ===== -->
+<section id="games">
+  <div class="reveal">
+    <div class="section-label">03 // FAVORITE GAMES</div>
+    <h2 class="section-title">즐겨하는 게임</h2>
+  </div>
+
+  <div class="games-grid reveal">
+    <div class="game-card">
+      <span class="game-emoji">⚔️</span>
+      <div class="game-name">리그 오브 레전드</div>
+      <div class="game-genre">MOBA</div>
+      <div class="game-hours">3,847 HOURS</div>
+      <div class="game-rank rank-diamond">💎 DIAMOND</div>
+    </div>
+    <div class="game-card">
+      <span class="game-emoji">🔫</span>
+      <div class="game-name">발로란트</div>
+      <div class="game-genre">FPS</div>
+      <div class="game-hours">2,156 HOURS</div>
+      <div class="game-rank rank-plat">💜 PLATINUM</div>
+    </div>
+    <div class="game-card">
+      <span class="game-emoji">🏝️</span>
+      <div class="game-name">마인크래프트</div>
+      <div class="game-genre">SANDBOX</div>
+      <div class="game-hours">1,523 HOURS</div>
+      <div class="game-rank rank-master">👑 서버장</div>
+    </div>
+    <div class="game-card">
+      <span class="game-emoji">⚽</span>
+      <div class="game-name">FC 온라인</div>
+      <div class="game-genre">SPORTS</div>
+      <div class="game-hours">987 HOURS</div>
+      <div class="game-rank rank-gold">🏅 GOLD</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MESSAGE TO MOM ===== -->
+<section id="message">
+  <div class="reveal">
+    <div class="section-label">04 // MESSAGE</div>
+    <h2 class="section-title">엄마한테 한마디</h2>
+  </div>
+
+  <div class="message-box reveal">
+    <div class="msg-header">
+      <div class="msg-avatar">👦</div>
+      <div>
+        <div class="msg-sender">조영래</div>
+        <div class="msg-time">TODAY AT 새벽 2:47 AM</div>
+      </div>
+    </div>
+
+    <div class="msg-content">
+      <p>엄마, 나 <span class="highlight">프로게이머</span> 될 거니까 게임은 투자야, 투자! 💰</p>
+      <p>공부는 AI가 다 해주는 시대가 온다며... <span class="small">(이건 어디서 들은 건데)</span></p>
+      <p>그리고 <span class="highlight">밥 차려주셔서 감사합니다</span>. 특히 라면 끓여줄 때 계란 두 개 넣어주는 거 최고 👍</p>
+      <p>아 그리고... 이번 시험은 좀... 그... <span class="small">(점수는 묻지 마세요 🙏)</span></p>
+      <p>근데 진짜 <span class="highlight">사랑해요 엄마</span> ❤️ <span class="small">(용돈 올려주면 더 사랑함)</span></p>
+    </div>
+
+    <div class="msg-footer">
+      <div class="msg-reactions">
+        <span class="reaction">❤️ <span class="count">1</span></span>
+        <span class="reaction">😂 <span class="count">3</span></span>
+        <span class="reaction">😤 <span class="count">1</span></span>
+        <span class="reaction">🍜 <span class="count">2</span></span>
+      </div>
+      <span class="msg-status">✓✓ 읽음</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DREAM ===== -->
+<section id="dream">
+  <div class="reveal">
+    <div class="section-label">05 // FUTURE</div>
+    <h2 class="section-title">장래희망</h2>
+  </div>
+
+  <div class="dream-container reveal">
+    <div class="dream-main">
+      <span class="dream-emoji">🏆</span>
+      <div class="dream-title">세계 최고의 프로게이머</div>
+      <div class="dream-desc">
+        T1 페이커 형 옆자리에 앉는 그 날까지...<br>
+        (일단 다이아 찍었으니까 반은 온 거 아닌가요?)
+      </div>
+
+      <div class="dream-roadmap">
+        <span class="roadmap-step done">✓ 게임 시작</span>
+        <span class="roadmap-arrow">→</span>
+        <span class="roadmap-step done">✓ 다이아 달성</span>
+        <span class="roadmap-arrow">→</span>
+        <span class="roadmap-step current">► 챌린저 도전 중</span>
+        <span class="roadmap-arrow">→</span>
+        <span class="roadmap-step future">○ 프로팀 입단</span>
+        <span class="roadmap-arrow">→</span>
+        <span class="roadmap-step future">○ 월드 챔피언</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-art">
+    ▄▀▄▀▄ GAME OVER? NO WAY ▄▀▄▀▄
+  </div>
+  <div class="footer-text">
+    MADE WITH <span class="heart">♥</span> FOR 조영래 · 2026 · GG WP
+  </div>
+</footer>
+
+<script>
+// Particles
+const particlesEl = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.classList.add('particle');
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (6 + Math.random() * 10) + 's';
+  p.style.animationDelay = (Math.random() * 8) + 's';
+  p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+  const colors = ['var(--neon-cyan)', 'var(--neon-pink)', 'var(--neon-purple)'];
+  const c = colors[Math.floor(Math.random() * colors.length)];
+  p.style.background = c;
+  p.style.boxShadow = `0 0 6px ${c}`;
+  particlesEl.appendChild(p);
+}
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 100);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+revealEls.forEach(el => observer.observe(el));
+
+// Animate bars on scroll
+const barObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const bars = entry.target.querySelectorAll('.bar-fill');
+      bars.forEach((bar, i) => {
+        setTimeout(() => {
+          bar.style.width = bar.dataset.width + '%';
+        }, i * 200);
+      });
+      barObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+const chartContainer = document.querySelector('.chart-container');
+if (chartContainer) barObserver.observe(chartContainer);
+
+// Stat counter animation
+const statObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      statObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.stat-card').forEach(el => statObserver.observe(el));
+
+// Reaction click
+document.querySelectorAll('.reaction').forEach(r => {
+  r.addEventListener('click', () => {
+    const count = r.querySelector('.count');
+    count.textContent = parseInt(count.textContent) + 1;
+    r.style.transform = 'scale(1.3)';
+    setTimeout(() => r.style.transform = 'scale(1)', 200);
+  });
+});
+
+// Typing effect for hero tag
+const heroTag = document.querySelector('.hero-tag');
+const tagText = heroTag.textContent;
+heroTag.textContent = '';
+let ti = 0;
+function typeTag() {
+  if (ti < tagText.length) {
+    heroTag.textContent += tagText[ti];
+    ti++;
+    setTimeout(typeTag, 50);
+  }
+}
+setTimeout(typeTag, 500);
+</script>
+</body>
+</html>
