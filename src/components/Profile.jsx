@@ -11,7 +11,7 @@ export default function Profile() {
       <Reveal className="profile-grid">
         <div className="profile-avatar">
           <div className="avatar-frame">
-            <img src="/youngrae.jpg" alt="조영래" className="avatar-photo" />
+            <img src={`${import.meta.env.BASE_URL}youngrae.jpg`} alt="조영래" className="avatar-photo" />
           </div>
           <div className="avatar-status">● ONLINE - 게임 중</div>
         </div>

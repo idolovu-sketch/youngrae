@@ -91,7 +91,7 @@ export default function Travel() {
     const photos = photosByFolder[galleryOpen];
     if (!photos || photos.length === 0) return;
 
-    const photoUrl = `/travel/${galleryOpen}/${photos[currentPhoto]}`;
+    const photoUrl = `${import.meta.env.BASE_URL}travel/${galleryOpen}/${photos[currentPhoto]}`;
     setDateLoading(true);
     setPhotoDate(null);
 
@@ -199,7 +199,7 @@ export default function Travel() {
             <div className="gallery-image-container">
               <button className="gallery-nav gallery-prev" onClick={prevPhoto}>‹</button>
               <img 
-                src={`/travel/${galleryOpen}/${photos[currentPhoto]}`} 
+                src={`${import.meta.env.BASE_URL}travel/${galleryOpen}/${photos[currentPhoto]}`}
                 alt={`${countryName} photo ${currentPhoto + 1}`}
                 className="gallery-image"
               />
